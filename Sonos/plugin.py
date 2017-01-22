@@ -108,6 +108,9 @@ def onMessage(Data, Status, Extra):
         creator = metaData.findtext('.//{http://purl.org/dc/elements/1.1/}creator')
         title = metaData.findtext('.//{http://purl.org/dc/elements/1.1/}title')
         mediaDescription = str(creator) + " - " + str(title)
+        if creator == None:
+           mediaDescription = metaData.findtext('.//{urn:schemas-rinconnetworks-com:metadata-1-0/}streamContent')
+
         #mediaDescription = ""
         UpdateDevice(1, playerState, mediaDescription)
     else:
