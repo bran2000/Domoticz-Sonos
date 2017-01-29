@@ -31,6 +31,8 @@ playerState = 0
 mediaLevel = 0
 mediaDescription = ""
 muted = 2
+creator = None
+title = None
 
 # Domoticz call back functions
 def onStart():
@@ -68,7 +70,7 @@ def onConnect(Status, Description):
     return True
 
 def onMessage(Data, Status, Extra):
-    global playerState, mediaDescription, mediaLevel, muted
+    global playerState, mediaDescription, mediaLevel, muted, creator, title 
     xmltree = ET.fromstring(Data)
     sonosPlayRespone = xmltree.find('.//{urn:schemas-upnp-org:service:AVTransport:1}PlayResponse')
     sonosPauseRespone = xmltree.find('.//{urn:schemas-upnp-org:service:AVTransport:1}PauseResponse')
@@ -77,6 +79,7 @@ def onMessage(Data, Status, Extra):
     sonosSetVolumeResponse = xmltree.findtext('.//{urn:schemas-upnp-org:service:RenderingControl:1}SetVolumeResponse')
     sonosState = xmltree.findtext('.//CurrentTransportState')
     metaData = xmltree.findtext('.//TrackMetaData')
+    uriMetaData = xmltree.findtext('.//CurrentURIMetaData')
     if sonosPlayRespone != None:
         playerState = 1
         UpdateDevice(1, playerState, mediaDescription)
@@ -105,12 +108,31 @@ def onMessage(Data, Status, Extra):
         UpdateDevice(1, playerState, mediaDescription)
     elif metaData != None:
         metaData = ET.fromstring(metaData)
-        creator = metaData.findtext('.//{http://purl.org/dc/elements/1.1/}creator')
-        title = metaData.findtext('.//{http://purl.org/dc/elements/1.1/}title')
-        mediaDescription = str(creator) + " - " + str(title)
-        if creator == None:
-           mediaDescription = metaData.findtext('.//{urn:schemas-rinconnetworks-com:metadata-1-0/}streamContent')
+        temp_creator = metaData.findtext('.//{http://purl.org/dc/elements/1.1/}creator')
+        temp_title = metaData.findtext('.//{http://purl.org/dc/elements/1.1/}title')
 
+        if temp_creator == None:
+           # If creator is None this could be an radiostation.
+           temp_title = metaData.findtext('.//{urn:schemas-rinconnetworks-com:metadata-1-0/}streamContent')
+           sendMessage('<?xml version="1.0"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:GetMediaInfo xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID></u:GetMediaInfo></s:Body></s:Envelope>', 'urn:schemas-upnp-org:service:AVTransport:1#GetMediaInfo', "/MediaRenderer/AVTransport/Control")
+           
+        if temp_creator != None:
+            creator = temp_creator
+        if temp_title != None:
+            title = temp_title
+
+        mediaDescription = str(creator) + " - " + str(title)
+        #mediaDescription = ""
+        UpdateDevice(1, playerState, mediaDescription)
+        
+    elif uriMetaData != None:
+        metaData = ET.fromstring(uriMetaData)
+        temp_creator = metaData.findtext('.//{http://purl.org/dc/elements/1.1/}title')
+
+        if temp_creator != None:
+            creator = temp_creator
+
+        mediaDescription = str(creator) + " - " + str(title)
         #mediaDescription = ""
         UpdateDevice(1, playerState, mediaDescription)
     else:
