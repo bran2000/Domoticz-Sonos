@@ -126,15 +126,20 @@ def onMessage(Data, Status, Extra):
         UpdateDevice(1, playerState, mediaDescription)
         
     elif uriMetaData != None:
-        metaData = ET.fromstring(uriMetaData)
-        temp_creator = metaData.findtext('.//{http://purl.org/dc/elements/1.1/}title')
-
-        if temp_creator != None:
-            creator = temp_creator
-
-        mediaDescription = str(creator) + " - " + str(title)
-        #mediaDescription = ""
-        UpdateDevice(1, playerState, mediaDescription)
+        try:
+            metaData = ET.fromstring(uriMetaData)
+            temp_creator = metaData.findtext('.//{http://purl.org/dc/elements/1.1/}title')
+    
+            if temp_creator != None:
+                creator = temp_creator
+    
+            mediaDescription = str(creator) + " - " + str(title)
+            #mediaDescription = ""
+            UpdateDevice(1, playerState, mediaDescription)
+        except:
+            Domoticz.Debug("Failed to parse data")
+            Domoticz.Debug(uriMetaData)
+        
     else:
         Domoticz.Debug(Data)
 
