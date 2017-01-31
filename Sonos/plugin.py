@@ -138,7 +138,7 @@ def onMessage(Data, Status, Extra):
             UpdateDevice(1, playerState, mediaDescription)
         except:
             Domoticz.Debug("Failed to parse data")
-            Domoticz.Debug(uriMetaData)
+            Domoticz.Debug(Data)
         
     else:
         Domoticz.Debug(Data)
