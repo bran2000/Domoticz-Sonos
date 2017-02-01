@@ -120,8 +120,13 @@ def onMessage(Data, Status, Extra):
             creator = temp_creator
         if temp_title != None:
             title = temp_title
-
-        mediaDescription = str(creator) + " - " + str(title)
+        
+        if not title:
+            dash = ""
+        else:
+            dash = " - "
+            
+        mediaDescription = str(creator) + dash + str(title)
         #mediaDescription = ""
         UpdateDevice(1, playerState, mediaDescription)
         
@@ -132,8 +137,13 @@ def onMessage(Data, Status, Extra):
     
             if temp_creator != None:
                 creator = temp_creator
+            
+            if not title:
+                dash = ""
+            else:
+                dash = " - "
     
-            mediaDescription = str(creator) + " - " + str(title)
+            mediaDescription = str(creator) + dash + str(title)
             #mediaDescription = ""
             UpdateDevice(1, playerState, mediaDescription)
         except:
